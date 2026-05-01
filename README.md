@@ -156,6 +156,52 @@ GITHUB_TOKEN=ghp_abc123def456ghi789jkl012mno345pqr678
 - Keep your token secure - it has access to your repositories
 - If compromised, delete the token in GitHub settings and generate a new one
 
+## How to Use
+
+### 1. Log In
+
+Open http://localhost:3000 in your browser. Enter your admin password to log in.
+
+### 2. Add a Project
+
+1. Click **"Add Project"** on the dashboard
+2. Enter a GitHub repository URL (e.g., `https://github.com/owner/repo`)
+3. Click **"Add"** - the repo appears in your project list
+
+### 3. Browse Files
+
+1. Click on a project to open it
+2. Use the file tree on the left to navigate folders and files
+3. Click any file to view its content with syntax highlighting
+
+### 4. Add Comments
+
+1. Open a file
+2. **Select text** you want to comment on
+3. A **"Comment"** button appears - click it
+4. Type your comment and press **Enter** or click **Save**
+
+### 5. View Comments
+
+- Comments appear in the right sidebar, positioned at their line numbers
+- Click a comment to scroll to that line
+- Each comment shows the selected text and your note
+
+### 6. Sync to GitHub
+
+Comments are stored locally. To save them to your repository:
+
+1. Click the **"Sync"** button in the header
+2. Comments are committed to `.clawdocu/` folder in your repo
+3. Your Claw can now read them directly from the repo
+
+### Mobile Usage
+
+On mobile devices:
+- Use the **bottom tabs** to switch between Files and Comments
+- Tap **Files** to browse the repository
+- Tap **Comments** to view all comments for the current file
+
 ## How It Works
 
 ### Comment Storage
