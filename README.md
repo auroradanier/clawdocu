@@ -92,19 +92,69 @@ pm2 startup
 
 ## Configuration
 
-Create a `.env` file with:
+### Step 1: Create Environment File
 
-```env
-ADMIN_PASSWORD=your_secure_password
-GITHUB_TOKEN=ghp_your_github_token
+Copy the example file and edit it:
+
+```bash
+cp .env.example .env
 ```
 
-**Getting a GitHub Token:**
-1. Go to https://github.com/settings/tokens
-2. Generate new token (classic)
-3. Select scopes:
-   - `repo` - Full access to private repos
-   - `public_repo` - Public repos only (lighter permissions)
+### Step 2: Set Admin Password
+
+Edit `.env` and set a secure password:
+
+```env
+ADMIN_PASSWORD=your_secure_password_here
+```
+
+This password is used to log in to ClawDocu.
+
+### Step 3: Get GitHub Token
+
+ClawDocu needs a GitHub Personal Access Token to access your repositories.
+
+**How to create a GitHub token:**
+
+1. Go to **GitHub Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+   
+   Direct link: https://github.com/settings/tokens
+
+2. Click **"Generate new token"** → **"Generate new token (classic)"**
+
+3. Fill in the form:
+   - **Note:** `ClawDocu` (or any name you like)
+   - **Expiration:** Choose based on your security needs (90 days, 1 year, or no expiration)
+   - **Select scopes:**
+     - ✅ `repo` - Full access to private and public repositories
+     - OR just `public_repo` - If you only need public repositories
+
+4. Click **"Generate token"** at the bottom
+
+5. **Copy the token immediately** (you won't see it again!)
+   
+   It looks like: `ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+### Step 4: Add Token to .env
+
+Edit `.env` and paste your token:
+
+```env
+ADMIN_PASSWORD=your_secure_password_here
+GITHUB_TOKEN=ghp_your_token_here
+```
+
+### Final .env Example
+
+```env
+ADMIN_PASSWORD=mySecretPassword123
+GITHUB_TOKEN=ghp_abc123def456ghi789jkl012mno345pqr678
+```
+
+**Security Notes:**
+- Never commit `.env` to git (it's already in `.gitignore`)
+- Keep your token secure - it has access to your repositories
+- If compromised, delete the token in GitHub settings and generate a new one
 
 ## How It Works
 
