@@ -2,7 +2,7 @@
 
 **Comment on docs. Discuss with your Claw.**
 
-A self-hosted documentation review tool. Add inline comments to any file in your GitHub repos, and discuss them with your Claw (AI assistant).
+A Claw-native documentation review tool. Make suggestions directly on docs, let your Claw improve them.
 
 ## Features
 
