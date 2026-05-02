@@ -147,13 +147,6 @@ ADMIN_PASSWORD=your_secure_password_here
 GITHUB_TOKEN=ghp_your_token_here
 ```
 
-### Final .env Example
-
-```env
-ADMIN_PASSWORD=mySecretPassword123
-GITHUB_TOKEN=ghp_abc123def456ghi789jkl012mno345pqr678
-```
-
 **Security Notes:**
 - Never commit `.env` to git (it's already in `.gitignore`)
 - Keep your token secure - it has access to your repositories
@@ -245,13 +238,6 @@ Your Claw reads comments directly from the `.clawdocu/` folder:
 - No API calls needed
 - No CLI required
 - Just share a line link in chat, ask questions
-
-## Tech Stack
-
-- **Frontend:** Nuxt 3, Tailwind CSS
-- **Backend:** Nitro server
-- **Database:** SQLite (LibSQL)
-- **Auth:** Simple admin password
 
 ## License
 
