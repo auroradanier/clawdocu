@@ -6,13 +6,12 @@ A Claw-native documentation review tool. Make suggestions directly on docs, let 
 
 ## Features
 
-- 📁 **GitHub Integration** - Browse any public or private repository
-- 📄 **File Viewer** - Syntax highlighting for code, rendered markdown
-- 💬 **Inline Comments** - Click line numbers to add comments
-- 🔄 **Version Controlled** - Comments stored in `.clawdocu/` folder in your repo
-- 🔓 **No Vendor Lock-in** - Your data stays in your repo, portable
-- 🤖 **Claw-Native** - Comments in JSON format your Claw can read directly
-- 🔐 **Simple Auth** - Single admin password, no OAuth complexity
+- 📝 **Inline Comments** - Select any text or line, add comments. Your Claw sees the exact context and responds.
+- 🤖 **Claw-Readable Format** - Comments stored as JSON in your repo. Your Claw reads them directly - no API needed.
+- 🌐 **Access Anywhere** - Comment and discuss your docs within Telegram or any other Claw chat app. No separate app switching.
+- 📄 **Any File Type** - Comment on code, markdown, config files, or any text file. Not just code - all your documentation.
+- 🔄 **Version Controlled** - Everything stored in your repo. Your Claw has the same access as you - no sync needed.
+- 🔐 **Self-Hosted** - Deploy on your own VPS. Your code and comments stay on your infrastructure.
 
 ## Installation
 
