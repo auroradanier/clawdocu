@@ -119,51 +119,68 @@ function findLineNumberFromDOM(): number {
 // Highlight selected text in rendered markdown
 const highlightRange = ref<Range | null>(null)
 const highlightSpan = ref<HTMLElement | null>(null)
+const highlightedLine = ref<number | null>(null)
+let highlightTimeout: ReturnType<typeof setTimeout> | null = null
 
 function highlightSelection() {
-  // Remove any existing highlight first
-  removeHighlight()
-  
-  const selection = window.getSelection()
-  console.warn('[highlightSelection] selection:', selection)
-  console.warn('[highlightSelection] selection.rangeCount:', selection?.rangeCount)
-  
-  if (!selection || selection.rangeCount === 0) {
-    console.warn('[highlightSelection] No selection or no ranges')
-    return
+  // Clear any pending highlight
+  if (highlightTimeout) {
+    clearTimeout(highlightTimeout)
   }
   
-  const range = selection.getRangeAt(0)
-  console.warn('[highlightSelection] range text:', range.toString())
-  
-  if (range.collapsed) {
-    console.warn('[highlightSelection] Range is collapsed (no selection)')
-    return
-  }
-  
-  // Find the element with data-line attribute
-  let node: Node | null = range.startContainer
-  let lineElement: Element | null = null
-  
-  while (node && node !== markdownRef.value) {
-    if (node instanceof Element && node.hasAttribute('data-line')) {
-      lineElement = node
-      break
+  // Debounce to avoid rapid DOM changes
+  highlightTimeout = setTimeout(() => {
+    const selection = window.getSelection()
+    console.warn('[highlightSelection] selection:', selection)
+    console.warn('[highlightSelection] selection.rangeCount:', selection?.rangeCount)
+    
+    if (!selection || selection.rangeCount === 0) {
+      console.warn('[highlightSelection] No selection or no ranges')
+      return
     }
-    node = node.parentElement
-  }
-  
-  console.warn('[highlightSelection] Found line element:', lineElement)
-  
-  if (lineElement) {
-    // Highlight the entire line
-    lineElement.classList.add('bg-red-100')
-    lineElement.style.backgroundColor = 'rgba(220, 38, 38, 0.15)'
-    highlightSpan.value = lineElement as unknown as HTMLElement
-    console.warn('[highlightSelection] Highlighted line element')
-  } else {
-    console.warn('[highlightSelection] No line element found')
-  }
+    
+    const range = selection.getRangeAt(0)
+    console.warn('[highlightSelection] range text:', range.toString())
+    
+    if (range.collapsed) {
+      console.warn('[highlightSelection] Range is collapsed (no selection)')
+      return
+    }
+    
+    // Find the element with data-line attribute
+    let node: Node | null = range.startContainer
+    let lineElement: Element | null = null
+    let lineNumber: number | null = null
+    
+    while (node && node !== markdownRef.value) {
+      if (node instanceof Element && node.hasAttribute('data-line')) {
+        lineElement = node
+        lineNumber = parseInt(node.getAttribute('data-line') || '0', 10)
+        break
+      }
+      node = node.parentElement
+    }
+    
+    console.warn('[highlightSelection] Found line element:', lineElement, 'line:', lineNumber)
+    console.warn('[highlightSelection] Currently highlighted line:', highlightedLine.value)
+    
+    // Only update if line changed
+    if (lineNumber !== highlightedLine.value) {
+      // Remove old highlight
+      removeHighlight()
+      
+      if (lineElement) {
+        // Highlight the new line
+        lineElement.classList.add('bg-red-100')
+        lineElement.style.backgroundColor = 'rgba(220, 38, 38, 0.15)'
+        highlightSpan.value = lineElement as unknown as HTMLElement
+        highlightedLine.value = lineNumber
+        console.warn('[highlightSelection] Highlighted new line:', lineNumber)
+      }
+    } else {
+      console.warn('[highlightSelection] Same line, skipping highlight update')
+    }
+  }, 100) // 100ms debounce
 }
 
 function removeHighlight() {
@@ -174,6 +191,7 @@ function removeHighlight() {
     highlightSpan.value = null
   }
   highlightRange.value = null
+  highlightedLine.value = null
 }
 
 const textSelection = useTextSelection()
