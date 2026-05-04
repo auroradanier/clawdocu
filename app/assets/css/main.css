@@ -70,6 +70,17 @@
   content: none !important;
 }
 
+/* Custom text selection highlight for markdown */
+.prose ::selection {
+  background-color: rgba(220, 38, 38, 0.3);
+  color: inherit;
+}
+
+.prose ::-moz-selection {
+  background-color: rgba(220, 38, 38, 0.3);
+  color: inherit;
+}
+
 /* Highlight.js overrides for light theme */
 .hljs {
   background: #f8f9fa !important;
