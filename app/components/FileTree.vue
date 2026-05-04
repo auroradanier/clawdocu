@@ -24,7 +24,8 @@ const {
   toggleFolder,
   selectFile,
   changeBranch,
-  getFileIcon
+  getFileIcon,
+  getVisibleCommentCount
 } = useFileTree()
 
 const handleBranchChange = async () => {
@@ -94,10 +95,10 @@ const handleSelectFile = (item: TreeItem) => {
           
           <!-- Comment count badge -->
           <span 
-            v-if="(item.type === 'file' && commentCounts[item.path]) || (item.type === 'dir' && directoryCommentCounts[item.path])" 
+            v-if="getVisibleCommentCount(item)" 
             class="text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full min-w-[20px] text-center"
           >
-            {{ item.type === 'file' ? commentCounts[item.path] : directoryCommentCounts[item.path] }}
+            {{ getVisibleCommentCount(item) }}
           </span>
         </div>
       </div>

@@ -134,6 +134,57 @@ export const useFileTree = () => {
     return counts
   })
 
+  // Calculate visible comment count for a directory
+  // Returns the count only if the directory is collapsed or has hidden nested comments
+  const getVisibleCommentCount = (item: TreeItem): number | null => {
+    if (item.type === 'file') {
+      return commentCounts.value[item.path] || null
+    }
+    
+    // For directories
+    const totalCount = directoryCommentCounts.value[item.path]
+    if (!totalCount) return null
+    
+    // If collapsed, show total count
+    if (!expandedPaths.value.has(item.path)) {
+      return totalCount
+    }
+    
+    // If expanded, check if there are hidden nested comments
+    // (comments in files inside unexpanded subdirectories)
+    let hiddenCount = 0
+    
+    const countHiddenComments = (dirPath: string) => {
+      // Find all files with comments under this path
+      for (const [filePath, count] of Object.entries(commentCounts.value)) {
+        if (!count) continue
+        if (filePath.startsWith(dirPath + '/')) {
+          // Check if any parent directory between dirPath and filePath is collapsed
+          const relativePath = filePath.slice(dirPath.length + 1)
+          const parts = relativePath.split('/')
+          
+          let hasCollapsedParent = false
+          let currentPath = dirPath
+          
+          for (let i = 0; i < parts.length - 1; i++) {
+            currentPath = currentPath + '/' + parts[i]
+            if (!expandedPaths.value.has(currentPath)) {
+              hasCollapsedParent = true
+              break
+            }
+          }
+          
+          if (hasCollapsedParent) {
+            hiddenCount += count
+          }
+        }
+      }
+    }
+    
+    countHiddenComments(item.path)
+    return hiddenCount > 0 ? hiddenCount : null
+  }
+
   // Get file icon based on filename and extension
   const getFileIcon = (filename: string): string => {
     const lower = filename.toLowerCase()
@@ -238,5 +289,6 @@ export const useFileTree = () => {
     selectFile,
     changeBranch,
     getFileIcon,
+    getVisibleCommentCount,
   }
 }
