@@ -575,17 +575,17 @@ function showFileMenu(event: MouseEvent, item: any) {
               @delete="handleDeleteComment"
               @clickComment="handleClickComment"
             />
-          </div>
-          
-          <!-- Empty Comments Sidebar (no file) -->
-          <aside v-else class="hidden md:block w-80 shrink-0 border-l border-gray-200 bg-white">
-            <div class="p-4">
-              <h3 class="text-xs font-semibold text-gray-500 uppercase mb-3">Comments</h3>
-              <div class="text-gray-400 text-sm text-center py-8">
-                Select a file to view comments.
+            
+            <!-- Empty Comments Sidebar (no file) -->
+            <aside v-else class="w-80 shrink-0 border-l border-gray-200 bg-white">
+              <div class="p-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase mb-3">Comments</h3>
+                <div class="text-gray-400 text-sm text-center py-8">
+                  Select a file to view comments.
+                </div>
               </div>
-            </div>
-          </aside>
+            </aside>
+          </div>
         </div>
       </div>
     </div>
