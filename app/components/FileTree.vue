@@ -43,12 +43,14 @@ const handleSelectFile = (item: TreeItem) => {
 </script>
 
 <template>
+  <!-- Desktop sidebar: hidden on mobile unless forceShow -->
   <aside 
     v-if="sidebarOpen"
     class="w-64 shrink-0 border-r border-gray-200 bg-white overflow-y-auto"
-    :class="{ 'hidden md:block': !forceShow }"
   >
-    <div class="p-4">
+    <!-- Only show on desktop unless forceShow is true -->
+    <div :class="{ 'hidden md:block': !forceShow }" class="h-full">
+      <div class="p-4">
       <!-- Branch Selector -->
       <div class="mb-4">
         <label class="text-xs font-semibold text-gray-500 uppercase mb-1 block">Branch</label>
@@ -102,6 +104,7 @@ const handleSelectFile = (item: TreeItem) => {
             {{ item.type === 'file' ? commentCounts[item.path] : directoryCommentCounts[item.path] }}
           </span>
         </div>
+      </div>
       </div>
     </div>
   </aside>
