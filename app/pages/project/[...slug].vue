@@ -118,6 +118,15 @@ function findLineNumberFromDOM(): number {
 
 const textSelection = useTextSelection()
 
+// Track window width for mobile detection
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
+onMounted(() => {
+  windowWidth.value = window.innerWidth
+  window.addEventListener('resize', () => {
+    windowWidth.value = window.innerWidth
+  })
+})
+
 const isMarkdown = computed(() => {
   const ext = selectedFile.value?.name?.split('.').pop()?.toLowerCase()
   return ext === 'md' || ext === 'markdown'
@@ -344,10 +353,6 @@ watch(
 function openCommentBoxLocal() {
   showToolbar.value = false
   openCommentBox(selectedText.value, commentBoxTop.value)
-  // On mobile, open the comments panel to show the input
-  if (window.innerWidth < 768) {
-    mobileTab.value = 'comments'
-  }
 }
 
 watch(markdownMode, async () => {
@@ -659,16 +664,6 @@ function showFileMenu(event: MouseEvent, item: any) {
             </button>
           </div>
           <div class="overflow-y-auto flex-1 p-4">
-            <CommentInput 
-              v-if="showCommentBox"
-              v-model:commentText="commentText"
-              :selectedText="selectedText"
-              :top="0"
-              position="static"
-              @save="handleSaveComment"
-              @cancel="closeCommentBox"
-            />
-            
             <div v-if="sortedComments.length > 0" class="space-y-3">
               <div 
                 v-for="(comment, idx) in sortedComments" 
@@ -682,9 +677,51 @@ function showFileMenu(event: MouseEvent, item: any) {
               </div>
             </div>
             
-            <div v-else-if="!showCommentBox" class="text-gray-400 text-sm text-center py-8">
+            <div v-else class="text-gray-400 text-sm text-center py-8">
               Select text in the file to add a comment.
             </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Mobile Comment Input Popup -->
+    <Teleport to="body">
+      <div 
+        v-if="showCommentBox && windowWidth < 768"
+        class="fixed inset-0 z-50 md:hidden"
+      >
+        <div class="absolute inset-0 bg-black/50" @click="closeCommentBox" />
+        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold">Add Comment</h3>
+            <button @click="closeCommentBox" class="p-1 text-gray-400 hover:text-gray-600">
+              <Icon name="i-lucide-x" class="w-5 h-5" />
+            </button>
+          </div>
+          <div class="mb-3 p-2 bg-gray-50 rounded text-sm text-gray-600">
+            {{ selectedText }}
+          </div>
+          <textarea
+            v-model="commentText"
+            placeholder="Write your comment..."
+            class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+            rows="3"
+          />
+          <div class="flex gap-2 mt-3">
+            <button 
+              @click="closeCommentBox"
+              class="flex-1 px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+            >
+              Cancel
+            </button>
+            <button 
+              @click="handleSaveComment"
+              class="flex-1 px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
+              :disabled="!commentText.trim()"
+            >
+              Save
+            </button>
           </div>
         </div>
       </div>
