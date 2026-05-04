@@ -116,6 +116,51 @@ function findLineNumberFromDOM(): number {
   return 0
 }
 
+// Highlight selected text in rendered markdown
+const highlightRange = ref<Range | null>(null)
+const highlightSpan = ref<HTMLElement | null>(null)
+
+function highlightSelection() {
+  // Remove any existing highlight first
+  removeHighlight()
+  
+  const selection = window.getSelection()
+  if (!selection || selection.rangeCount === 0) return
+  
+  const range = selection.getRangeAt(0)
+  if (range.collapsed) return
+  
+  // Store the range for later removal
+  highlightRange.value = range.cloneRange()
+  
+  // Create a highlight span
+  const span = document.createElement('span')
+  span.className = 'bg-red-200 rounded'
+  span.style.backgroundColor = 'rgba(220, 38, 38, 0.3)'
+  highlightSpan.value = span
+  
+  try {
+    range.surroundContents(span)
+  } catch (e) {
+    // surroundContents fails if range spans multiple elements
+    // In that case, we just rely on browser's native selection highlight
+    console.log('Could not highlight selection (spans multiple elements)')
+  }
+}
+
+function removeHighlight() {
+  if (highlightSpan.value && highlightSpan.value.parentNode) {
+    // Restore the original text by unwrapping the span
+    const parent = highlightSpan.value.parentNode
+    while (highlightSpan.value.firstChild) {
+      parent.insertBefore(highlightSpan.value.firstChild, highlightSpan.value)
+    }
+    parent.removeChild(highlightSpan.value)
+    highlightSpan.value = null
+  }
+  highlightRange.value = null
+}
+
 const textSelection = useTextSelection()
 
 // Track window width for mobile detection
@@ -344,15 +389,28 @@ watch(
         selectedLineNumber.value = findLineNumber(text)
       }
       showToolbar.value = true
+      
+      // Highlight selected text in rendered markdown
+      if (isMarkdown.value && markdownMode.value === 'render') {
+        highlightSelection()
+      }
     } else {
       showToolbar.value = false
+      // Remove highlight when selection is cleared
+      removeHighlight()
     }
   }
 )
 
 function openCommentBoxLocal() {
   showToolbar.value = false
+  removeHighlight()
   openCommentBox(selectedText.value, commentBoxTop.value)
+}
+
+function closeCommentBoxLocal() {
+  removeHighlight()
+  closeCommentBox()
 }
 
 watch(markdownMode, async () => {
@@ -598,7 +656,7 @@ function showFileMenu(event: MouseEvent, item: any) {
               :linesCount="lines.length"
               :getCommentTop="getCommentTop"
               @save="handleSaveComment"
-              @cancel="closeCommentBox"
+              @cancel="closeCommentBoxLocal"
               @delete="handleDeleteComment"
               @clickComment="handleClickComment"
             />
@@ -709,11 +767,11 @@ function showFileMenu(event: MouseEvent, item: any) {
         v-if="showCommentBox && windowWidth < 768"
         class="fixed inset-0 z-50 md:hidden"
       >
-        <div class="absolute inset-0 bg-black/50" @click="closeCommentBox" />
+        <div class="absolute inset-0 bg-black/50" @click="closeCommentBoxLocal" />
         <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-4">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-semibold">Add Comment</h3>
-            <button @click="closeCommentBox" class="p-1 text-gray-400 hover:text-gray-600">
+            <button @click="closeCommentBoxLocal" class="p-1 text-gray-400 hover:text-gray-600">
               <Icon name="i-lucide-x" class="w-5 h-5" />
             </button>
           </div>
@@ -728,7 +786,7 @@ function showFileMenu(event: MouseEvent, item: any) {
           />
           <div class="flex gap-2 mt-3">
             <button 
-              @click="closeCommentBox"
+              @click="closeCommentBoxLocal"
               class="flex-1 px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
               Cancel
