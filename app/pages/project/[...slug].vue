@@ -38,23 +38,16 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
-const projectId = computed(() => route.params.id as string)
-const filePath = computed(() => {
-  const path = route.params.path
-  console.log('[Project Page - index] route.params:', route.params)
-  console.log('[Project Page - index] path:', path)
-  if (Array.isArray(path)) {
-    return path.join('/')
-  }
-  return path || ''
+
+// Parse slug: first segment is projectId, rest is filePath
+const slug = computed(() => {
+  const s = route.params.slug
+  return Array.isArray(s) ? s : s ? [s] : []
 })
 
-// Log on mount
-onMounted(() => {
-  console.log('[Project Page] Mounted')
-  console.log('[Project Page] projectId:', projectId.value)
-  console.log('[Project Page] filePath:', filePath.value)
-})
+const projectId = computed(() => slug.value[0] || '')
+const filePath = computed(() => slug.value.slice(1).join('/'))
+const hasFile = computed(() => filePath.value.length > 0)
 
 // Use composables
 const {
@@ -104,9 +97,6 @@ const commentPositionsVersion = ref(0)
 const selectedLineNumber = ref(1)
 const currentCommentIndex = ref(0)
 const mobileTab = ref<'files' | 'comments' | null>(null)
-
-// Computed: has file selected
-const hasFile = computed(() => !!filePath.value)
 
 // Find line number from DOM
 function findLineNumberFromDOM(): number {
@@ -257,9 +247,20 @@ onMounted(async () => {
   }
 })
 
-watch(filePath, async (newPath, oldPath) => {
-  if (newPath && newPath !== oldPath) {
-    await loadFileFromPath(newPath)
+// Watch for route changes
+watch(slug, async (newSlug, oldSlug) => {
+  const newProjectId = newSlug[0]
+  const newFilePath = newSlug.slice(1).join('/')
+  const oldProjectId = oldSlug?.[0]
+  const oldFilePath = oldSlug?.slice(1).join('/')
+  
+  if (newProjectId !== oldProjectId) {
+    await loadProject()
+    await loadTree(projectId.value)
+  }
+  
+  if (newFilePath !== oldFilePath && newFilePath) {
+    await loadFileFromPath(newFilePath)
   }
 })
 
@@ -443,11 +444,6 @@ function showFileMenu(event: MouseEvent, item: any) {
 
 <template>
   <div class="flex-1 flex min-h-0 relative">
-    <!-- DEBUG: Show route info (index page) -->
-    <div class="fixed top-0 left-0 right-0 bg-yellow-100 p-2 text-xs z-50">
-      DEBUG (index): route.params = {{ JSON.stringify(route.params) }} | projectId = {{ projectId }} | filePath = {{ filePath }} | hasFile = {{ hasFile }}
-    </div>
-    
     <!-- File Tree Sidebar (desktop) -->
     <FileTree 
       :projectId="projectId"
