@@ -444,14 +444,15 @@ function showFileMenu(event: MouseEvent, item: any) {
 
 <template>
   <div class="flex-1 flex min-h-0 relative">
-    <!-- File Tree Sidebar (desktop) -->
-    <FileTree 
-      :projectId="projectId"
-      v-model:sidebarOpen="sidebarOpen"
-      @selectFile="handleSelectFile"
-      @showFileMenu="showFileMenu"
-      class="hidden md:block"
-    />
+    <!-- File Tree Sidebar (desktop only) -->
+    <div class="hidden md:block">
+      <FileTree 
+        :projectId="projectId"
+        v-model:sidebarOpen="sidebarOpen"
+        @selectFile="handleSelectFile"
+        @showFileMenu="showFileMenu"
+      />
+    </div>
 
     <!-- Main Content Area with Comments -->
     <div class="flex-1 flex min-w-0 flex-col pb-14 md:pb-0">
