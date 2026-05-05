@@ -673,14 +673,14 @@ function showFileMenu(event: MouseEvent, item: any) {
       </button>
       <button 
         @click="mobileTab = mobileTab === 'comments' ? null : 'comments'"
-        class="flex-1 py-3 flex items-center justify-center gap-2 text-sm relative"
+        class="flex-1 py-3 flex items-center justify-center gap-2 text-sm"
         :class="mobileTab === 'comments' ? 'text-red-600 bg-red-50' : 'text-gray-600'"
       >
         <Icon name="i-lucide-message-square" class="w-5 h-5" />
         Comments
         <span 
           v-if="comments.length > 0" 
-          class="absolute top-2 right-1/4 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+          class="bg-red-500 text-white text-xs rounded-full px-1.5 min-w-[20px] h-5 flex items-center justify-center"
         >
           {{ comments.length }}
         </span>
