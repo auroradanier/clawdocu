@@ -745,6 +745,7 @@ function showFileMenu(event: MouseEvent, item: any) {
                 @click="handleClickComment(comment); mobileTab = null"
               >
                 <div class="text-xs text-gray-400 mb-1">Line {{ comment.lineNumber }}</div>
+                <div v-if="comment.selectedText" class="text-xs text-gray-500 mb-2 p-2 bg-white rounded italic">"{{ comment.selectedText }}"</div>
                 <div class="text-sm text-gray-700">{{ comment.text }}</div>
               </div>
             </div>
