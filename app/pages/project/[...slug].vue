@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useTextSelection } from '@vueuse/core'
 import hljs from 'highlight.js'
 import MarkdownIt from 'markdown-it'
@@ -116,132 +116,6 @@ function findLineNumberFromDOM(): number {
   return 0
 }
 
-// Highlight selected text in rendered markdown
-const highlightRange = ref<Range | null>(null)
-const highlightSpan = ref<HTMLElement | null>(null)
-const highlightedLine = ref<number | null>(null)
-let highlightTimeout: ReturnType<typeof setTimeout> | null = null
-
-function highlightSelection() {
-  // Clear any pending highlight
-  if (highlightTimeout) {
-    clearTimeout(highlightTimeout)
-  }
-  
-  // Debounce to avoid rapid DOM changes
-  highlightTimeout = setTimeout(() => {
-    const selection = window.getSelection()
-    console.warn('[highlightSelection] selection:', selection)
-    console.warn('[highlightSelection] selection.rangeCount:', selection?.rangeCount)
-    
-    if (!selection || selection.rangeCount === 0) {
-      console.warn('[highlightSelection] No selection or no ranges')
-      return
-    }
-    
-    const range = selection.getRangeAt(0)
-    console.warn('[highlightSelection] range text:', range.toString())
-    
-    if (range.collapsed) {
-      console.warn('[highlightSelection] Range is collapsed (no selection)')
-      return
-    }
-    
-    // Find the element with data-line attribute
-    let node: Node | null = range.startContainer
-    let lineElement: Element | null = null
-    let lineNumber: number | null = null
-    
-    while (node && node !== markdownRef.value) {
-      if (node instanceof Element && node.hasAttribute('data-line')) {
-        lineElement = node
-        lineNumber = parseInt(node.getAttribute('data-line') || '0', 10)
-        break
-      }
-      node = node.parentElement
-    }
-    
-    console.warn('[highlightSelection] Found line element:', lineElement, 'line:', lineNumber)
-    console.warn('[highlightSelection] Currently highlighted line:', highlightedLine.value)
-    
-    // Only update if line changed
-    if (lineNumber !== highlightedLine.value) {
-      // Remove old highlight
-      removeHighlight()
-      
-      if (lineElement) {
-        // Highlight the new line
-        lineElement.classList.add('bg-red-100')
-        lineElement.style.backgroundColor = 'rgba(220, 38, 38, 0.15)'
-        highlightSpan.value = lineElement as unknown as HTMLElement
-        highlightedLine.value = lineNumber
-        console.warn('[highlightSelection] Highlighted new line:', lineNumber)
-      }
-    } else {
-      console.warn('[highlightSelection] Same line, skipping highlight update')
-    }
-  }, 100) // 100ms debounce
-}
-
-function removeHighlight() {
-  if (highlightSpan.value) {
-    // Remove the highlight class and style
-    highlightSpan.value.classList.remove('bg-red-100')
-    highlightSpan.value.style.backgroundColor = ''
-    highlightSpan.value = null
-  }
-  highlightRange.value = null
-  highlightedLine.value = null
-}
-
-// Handle mouse up on markdown to capture selection
-function handleMarkdownMouseUp() {
-  // Small delay to let the selection complete
-  setTimeout(() => {
-    const selection = window.getSelection()
-    console.warn('[handleMarkdownMouseUp] selection:', selection?.toString())
-    
-    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-      console.warn('[handleMarkdownMouseUp] No selection')
-      removeHighlight()
-      return
-    }
-    
-    const text = selection.toString()
-    if (text.length < 2) {
-      console.warn('[handleMarkdownMouseUp] Selection too short')
-      removeHighlight()
-      return
-    }
-    
-    // Find the element with data-line attribute
-    const range = selection.getRangeAt(0)
-    let node: Node | null = range.startContainer
-    let lineElement: Element | null = null
-    let lineNumber: number | null = null
-    
-    while (node && node !== markdownRef.value) {
-      if (node instanceof Element && node.hasAttribute('data-line')) {
-        lineElement = node
-        lineNumber = parseInt(node.getAttribute('data-line') || '0', 10)
-        break
-      }
-      node = node.parentElement
-    }
-    
-    console.warn('[handleMarkdownMouseUp] Found line element:', lineElement, 'line:', lineNumber)
-    
-    if (lineElement && lineNumber !== highlightedLine.value) {
-      removeHighlight()
-      lineElement.classList.add('bg-red-100')
-      lineElement.style.backgroundColor = 'rgba(220, 38, 38, 0.15)'
-      highlightSpan.value = lineElement as unknown as HTMLElement
-      highlightedLine.value = lineNumber
-      console.warn('[handleMarkdownMouseUp] Highlighted line:', lineNumber)
-    }
-  }, 10)
-}
-
 const textSelection = useTextSelection()
 
 // Track window width for mobile detection
@@ -251,74 +125,7 @@ onMounted(() => {
   window.addEventListener('resize', () => {
     windowWidth.value = window.innerWidth
   })
-  
-  // Add selection change listener for markdown highlight
-  document.addEventListener('selectionchange', handleSelectionChange)
 })
-
-onUnmounted(() => {
-  document.removeEventListener('selectionchange', handleSelectionChange)
-})
-
-function handleSelectionChange() {
-  // Only process if we're in markdown render mode
-  if (!isMarkdown.value || markdownMode.value !== 'render' || !markdownRef.value) {
-    return
-  }
-  
-  const selection = window.getSelection()
-  
-  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-    removeHighlight()
-    return
-  }
-  
-  const text = selection.toString()
-  if (text.length < 2) {
-    removeHighlight()
-    return
-  }
-  
-  // Check if selection is within our markdown container
-  const range = selection.getRangeAt(0)
-  let node: Node | null = range.startContainer
-  let isWithinMarkdown = false
-  
-  while (node) {
-    if (node === markdownRef.value) {
-      isWithinMarkdown = true
-      break
-    }
-    node = node.parentElement
-  }
-  
-  if (!isWithinMarkdown) {
-    return
-  }
-  
-  // Find the element with data-line attribute
-  node = range.startContainer
-  let lineElement: Element | null = null
-  let lineNumber: number | null = null
-  
-  while (node && node !== markdownRef.value) {
-    if (node instanceof Element && node.hasAttribute('data-line')) {
-      lineElement = node
-      lineNumber = parseInt(node.getAttribute('data-line') || '0', 10)
-      break
-    }
-    node = node.parentElement
-  }
-  
-  if (lineElement && lineNumber !== highlightedLine.value) {
-    removeHighlight()
-    lineElement.classList.add('bg-red-100')
-    lineElement.style.backgroundColor = 'rgba(220, 38, 38, 0.15)'
-    highlightSpan.value = lineElement as unknown as HTMLElement
-    highlightedLine.value = lineNumber
-    console.warn('[handleSelectionChange] Highlighted line:', lineNumber)
-  }
-}
 
 const isMarkdown = computed(() => {
   const ext = selectedFile.value?.name?.split('.').pop()?.toLowerCase()
@@ -379,6 +186,27 @@ const highlightedLines = computed(() => {
 const lines = computed(() => fileContent.value.split('\n'))
 
 const contentHeight = ref(0)
+
+// Rendered markdown with highlighted comments
+const renderedMarkdown = computed(() => {
+  if (!fileContent.value) return ''
+  
+  let html = md.render(fileContent.value)
+  
+  // Highlight commented text in rendered markdown
+  for (const comment of comments.value) {
+    if (comment.selectedText) {
+      // Escape special regex characters
+      const escapedText = comment.selectedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      // Create a regex to find the text (case-sensitive, first occurrence)
+      const regex = new RegExp(`(${escapedText})`, 'g')
+      // Wrap with highlight span
+      html = html.replace(regex, '<mark class="bg-red-100 text-inherit rounded px-0.5" data-comment-id="' + comment.id + '">$1</mark>')
+    }
+  }
+  
+  return html
+})
 
 function updateContentHeight() {
   if (contentRef.value) {
@@ -541,28 +369,18 @@ watch(
         selectedLineNumber.value = findLineNumber(text)
       }
       showToolbar.value = true
-      
-      // Highlight selected text in rendered markdown
-      if (isMarkdown.value && markdownMode.value === 'render') {
-        console.warn('[textSelection watcher] Calling highlightSelection()')
-        highlightSelection()
-      }
     } else {
       showToolbar.value = false
-      // Remove highlight when selection is cleared
-      removeHighlight()
     }
   }
 )
 
 function openCommentBoxLocal() {
   showToolbar.value = false
-  removeHighlight()
   openCommentBox(selectedText.value, commentBoxTop.value)
 }
 
 function closeCommentBoxLocal() {
-  removeHighlight()
   closeCommentBox()
 }
 
@@ -787,7 +605,7 @@ function showFileMenu(event: MouseEvent, item: any) {
               v-else-if="isMarkdown && markdownMode === 'render'" 
               ref="markdownRef"
               class="prose prose-sm max-w-none select-text"
-              v-html="md.render(fileContent)"
+              v-html="renderedMarkdown"
             />
             
             <!-- Code View -->
