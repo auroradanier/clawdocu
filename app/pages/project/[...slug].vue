@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useTextSelection } from '@vueuse/core'
 import hljs from 'highlight.js'
 import MarkdownIt from 'markdown-it'
@@ -251,7 +251,74 @@ onMounted(() => {
   window.addEventListener('resize', () => {
     windowWidth.value = window.innerWidth
   })
+  
+  // Add selection change listener for markdown highlight
+  document.addEventListener('selectionchange', handleSelectionChange)
 })
+
+onUnmounted(() => {
+  document.removeEventListener('selectionchange', handleSelectionChange)
+})
+
+function handleSelectionChange() {
+  // Only process if we're in markdown render mode
+  if (!isMarkdown.value || markdownMode.value !== 'render' || !markdownRef.value) {
+    return
+  }
+  
+  const selection = window.getSelection()
+  
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    removeHighlight()
+    return
+  }
+  
+  const text = selection.toString()
+  if (text.length < 2) {
+    removeHighlight()
+    return
+  }
+  
+  // Check if selection is within our markdown container
+  const range = selection.getRangeAt(0)
+  let node: Node | null = range.startContainer
+  let isWithinMarkdown = false
+  
+  while (node) {
+    if (node === markdownRef.value) {
+      isWithinMarkdown = true
+      break
+    }
+    node = node.parentElement
+  }
+  
+  if (!isWithinMarkdown) {
+    return
+  }
+  
+  // Find the element with data-line attribute
+  node = range.startContainer
+  let lineElement: Element | null = null
+  let lineNumber: number | null = null
+  
+  while (node && node !== markdownRef.value) {
+    if (node instanceof Element && node.hasAttribute('data-line')) {
+      lineElement = node
+      lineNumber = parseInt(node.getAttribute('data-line') || '0', 10)
+      break
+    }
+    node = node.parentElement
+  }
+  
+  if (lineElement && lineNumber !== highlightedLine.value) {
+    removeHighlight()
+    lineElement.classList.add('bg-red-100')
+    lineElement.style.backgroundColor = 'rgba(220, 38, 38, 0.15)'
+    highlightSpan.value = lineElement as unknown as HTMLElement
+    highlightedLine.value = lineNumber
+    console.warn('[handleSelectionChange] Highlighted line:', lineNumber)
+  }
+}
 
 const isMarkdown = computed(() => {
   const ext = selectedFile.value?.name?.split('.').pop()?.toLowerCase()
@@ -721,7 +788,6 @@ function showFileMenu(event: MouseEvent, item: any) {
               ref="markdownRef"
               class="prose prose-sm max-w-none select-text"
               v-html="md.render(fileContent)"
-              @mouseup="handleMarkdownMouseUp"
             />
             
             <!-- Code View -->
