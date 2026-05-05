@@ -686,11 +686,10 @@ function showFileMenu(event: MouseEvent, item: any) {
         </span>
       </button>
       <button 
-        v-if="hasChanges"
         @click="handleSync"
-        :disabled="syncing"
+        :disabled="syncing || !hasChanges"
         class="flex-1 py-3 flex items-center justify-center gap-2 text-sm"
-        :class="syncing ? 'text-gray-400' : 'text-red-600 bg-red-50'"
+        :class="syncing ? 'text-gray-400' : hasChanges ? 'text-red-600 bg-red-50' : 'text-gray-400'"
       >
         <Icon :name="syncing ? 'i-lucide-loader-circle' : 'i-lucide-upload-cloud'" class="w-5 h-5" :class="syncing ? 'animate-spin' : ''" />
         {{ syncing ? 'Syncing' : 'Sync' }}
