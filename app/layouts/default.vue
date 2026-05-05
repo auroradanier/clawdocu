@@ -15,7 +15,7 @@ async function fetchUser() {
 
 async function logout() {
   await $fetch('/api/auth/logout', { method: 'POST' })
-  navigateTo('/login')
+  navigateTo('/')
 }
 </script>
 
