@@ -20,6 +20,7 @@ export const CommentItem: typeof import("../app/components/CommentItem.vue")['de
 export const CommentsHeader: typeof import("../app/components/CommentsHeader.vue")['default']
 export const CommentsSidebar: typeof import("../app/components/CommentsSidebar.vue")['default']
 export const FileTree: typeof import("../app/components/FileTree.vue")['default']
+export const MobileFileList: typeof import("../app/components/MobileFileList.vue")['default']
 export const UAccordion: typeof import("../node_modules/@nuxt/ui/dist/runtime/components/Accordion.vue")['default']
 export const UAlert: typeof import("../node_modules/@nuxt/ui/dist/runtime/components/Alert.vue")['default']
 export const UApp: typeof import("../node_modules/@nuxt/ui/dist/runtime/components/App.vue")['default']
@@ -173,6 +174,7 @@ export const LazyCommentItem: LazyComponent<typeof import("../app/components/Com
 export const LazyCommentsHeader: LazyComponent<typeof import("../app/components/CommentsHeader.vue")['default']>
 export const LazyCommentsSidebar: LazyComponent<typeof import("../app/components/CommentsSidebar.vue")['default']>
 export const LazyFileTree: LazyComponent<typeof import("../app/components/FileTree.vue")['default']>
+export const LazyMobileFileList: LazyComponent<typeof import("../app/components/MobileFileList.vue")['default']>
 export const LazyUAccordion: LazyComponent<typeof import("../node_modules/@nuxt/ui/dist/runtime/components/Accordion.vue")['default']>
 export const LazyUAlert: LazyComponent<typeof import("../node_modules/@nuxt/ui/dist/runtime/components/Alert.vue")['default']>
 export const LazyUApp: LazyComponent<typeof import("../node_modules/@nuxt/ui/dist/runtime/components/App.vue")['default']>

@@ -136,6 +136,7 @@ export const useFileTree = () => {
 
   // Calculate visible comment count for a directory
   // Returns the count only if the directory is collapsed or has hidden nested comments
+  // The count should only show on the LOWEST visible level that contains the commented file
   const getVisibleCommentCount = (item: TreeItem): number | null => {
     if (item.type === 'file') {
       return commentCounts.value[item.path] || null
@@ -145,51 +146,39 @@ export const useFileTree = () => {
     const totalCount = directoryCommentCounts.value[item.path]
     if (!totalCount) return null
     
-    // If collapsed, show total count
+    // If collapsed, show total count (this is the lowest visible level)
     if (!expandedPaths.value.has(item.path)) {
-      console.warn('[getVisibleCommentCount] Collapsed folder:', item.path, 'count:', totalCount)
       return totalCount
     }
     
-    // If expanded, check if there are hidden nested comments
-    // (comments in files inside unexpanded subdirectories)
-    let hiddenCount = 0
+    // If expanded, check if there are comments in DIRECT children (files or collapsed subfolders)
+    // We should NOT show count if comments are in expanded subfolders (they will show their own count)
+    let directVisibleCount = 0
     
     // Find all files with comments under this path
     for (const [filePath, count] of Object.entries(commentCounts.value)) {
       if (!count) continue
       if (!filePath.startsWith(item.path + '/')) continue
       
-      // Check if any parent directory between item.path and filePath is collapsed
       const relativePath = filePath.slice(item.path.length + 1)
       const parts = relativePath.split('/')
       
-      // If it's a direct child file, it's visible (no hidden count)
+      // If it's a direct child file (depth 1), it's visible - don't count
       if (parts.length === 1) {
-        console.warn('[getVisibleCommentCount] Direct child file visible:', filePath)
         continue
       }
       
-      // Check intermediate directories
-      let hasCollapsedParent = false
-      let currentPath = item.path
+      // Check the first subfolder (direct child)
+      const firstSubfolder = item.path + '/' + parts[0]
       
-      for (let i = 0; i < parts.length - 1; i++) {
-        currentPath = currentPath + '/' + parts[i]
-        if (!expandedPaths.value.has(currentPath)) {
-          hasCollapsedParent = true
-          console.warn('[getVisibleCommentCount] Found collapsed parent:', currentPath, 'for file:', filePath)
-          break
-        }
-      }
-      
-      if (hasCollapsedParent) {
-        hiddenCount += count
+      // If the direct child subfolder is collapsed, count it
+      // If the direct child subfolder is expanded, don't count it (it will show its own count)
+      if (!expandedPaths.value.has(firstSubfolder)) {
+        directVisibleCount += count
       }
     }
     
-    console.warn('[getVisibleCommentCount] Expanded folder:', item.path, 'hiddenCount:', hiddenCount)
-    return hiddenCount > 0 ? hiddenCount : null
+    return directVisibleCount > 0 ? directVisibleCount : null
   }
 
   // Get file icon based on filename and extension
