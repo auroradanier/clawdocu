@@ -362,10 +362,6 @@ function handleSelectFile(item: { path: string; name: string; type: string }) {
 watch(
   () => textSelection.text.value,
   (text) => {
-    console.warn('[textSelection watcher] text:', text)
-    console.warn('[textSelection watcher] isMarkdown:', isMarkdown.value)
-    console.warn('[textSelection watcher] markdownMode:', markdownMode.value)
-    
     if (text && text.length >= 2) {
       selectedText.value = text
       const rects = textSelection.rects.value

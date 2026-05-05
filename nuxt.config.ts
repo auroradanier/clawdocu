@@ -2,7 +2,6 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-04-26',
   devtools: { enabled: true },
-  debug: true,
   
   modules: ['@nuxt/ui', '@vueuse/nuxt'],
   
