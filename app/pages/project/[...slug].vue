@@ -194,6 +194,54 @@ function removeHighlight() {
   highlightedLine.value = null
 }
 
+// Handle mouse up on markdown to capture selection
+function handleMarkdownMouseUp() {
+  // Small delay to let the selection complete
+  setTimeout(() => {
+    const selection = window.getSelection()
+    console.warn('[handleMarkdownMouseUp] selection:', selection?.toString())
+    
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+      console.warn('[handleMarkdownMouseUp] No selection')
+      removeHighlight()
+      return
+    }
+    
+    const text = selection.toString()
+    if (text.length < 2) {
+      console.warn('[handleMarkdownMouseUp] Selection too short')
+      removeHighlight()
+      return
+    }
+    
+    // Find the element with data-line attribute
+    const range = selection.getRangeAt(0)
+    let node: Node | null = range.startContainer
+    let lineElement: Element | null = null
+    let lineNumber: number | null = null
+    
+    while (node && node !== markdownRef.value) {
+      if (node instanceof Element && node.hasAttribute('data-line')) {
+        lineElement = node
+        lineNumber = parseInt(node.getAttribute('data-line') || '0', 10)
+        break
+      }
+      node = node.parentElement
+    }
+    
+    console.warn('[handleMarkdownMouseUp] Found line element:', lineElement, 'line:', lineNumber)
+    
+    if (lineElement && lineNumber !== highlightedLine.value) {
+      removeHighlight()
+      lineElement.classList.add('bg-red-100')
+      lineElement.style.backgroundColor = 'rgba(220, 38, 38, 0.15)'
+      highlightSpan.value = lineElement as unknown as HTMLElement
+      highlightedLine.value = lineNumber
+      console.warn('[handleMarkdownMouseUp] Highlighted line:', lineNumber)
+    }
+  }, 10)
+}
+
 const textSelection = useTextSelection()
 
 // Track window width for mobile detection
@@ -673,6 +721,7 @@ function showFileMenu(event: MouseEvent, item: any) {
               ref="markdownRef"
               class="prose prose-sm max-w-none select-text"
               v-html="md.render(fileContent)"
+              @mouseup="handleMarkdownMouseUp"
             />
             
             <!-- Code View -->
