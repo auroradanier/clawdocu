@@ -67,7 +67,7 @@ export const useComments = () => {
     }
   }
 
-  // Save comment
+  // Save comment (local only, sync manually)
   const saveComment = async (projectId: string, filePath?: string, lineNumber?: number) => {
     if (!commentText.value.trim()) return
     
@@ -87,19 +87,17 @@ export const useComments = () => {
     allComments.value[path] = [...(allComments.value[path] || []), comment]
 
     closeCommentBox()
-
-    // Sync to GitHub
-    await syncComments(projectId)
+    // No auto-sync - user clicks Sync button manually
   }
 
-  // Delete comment
+  // Delete comment (local only, sync manually)
   const deleteComment = async (projectId: string, commentId: string) => {
     comments.value = comments.value.filter(c => c.id !== commentId)
     if (currentFilePath.value) {
       // Keep as empty array so sync knows to delete the file
       allComments.value[currentFilePath.value] = [...comments.value]
     }
-    await syncComments(projectId)
+    // No auto-sync - user clicks Sync button manually
     
     // Return current file path so caller can refresh counts
     return currentFilePath.value
