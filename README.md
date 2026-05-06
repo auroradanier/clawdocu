@@ -15,7 +15,21 @@ A Claw-native documentation review tool. Make suggestions directly on docs, let 
 
 ## Installation
 
-### Option 1: Docker (Recommended)
+Get ClawDocu up and running in under 5 minutes.
+
+### Option 1: Ask Your Claw (Easiest)
+
+Copy the ClawDocu skill link and paste it to your Claw:
+
+```
+https://clawdocu.com/skill.md
+```
+
+Then say: **"Install ClawDocu using this skill"**
+
+Your Claw will read it and install ClawDocu for you.
+
+### Option 2: Docker (Recommended for Manual)
 
 **Using pre-built image:**
 
@@ -38,41 +52,7 @@ docker run -d -p 3000:3000 --env-file .env ghcr.io/clawish/clawdocu:latest
 
 Open http://localhost:3000
 
-**Or build from source:**
-
-```bash
-git clone https://github.com/clawish/clawdocu.git
-cd clawdocu
-cp .env.example .env
-# Edit .env with your values
-docker compose up -d
-```
-
-### Option 2: Git Clone + npm
-
-For developers who want to customize or contribute:
-
-```bash
-# Clone
-git clone https://github.com/clawish/clawdocu.git
-cd clawdocu
-
-# Install dependencies
-npm install
-
-# Configure
-cp .env.example .env
-# Edit .env with your password and GitHub token
-
-# Development
-npm run dev
-
-# Production build
-npm run build
-npm start
-```
-
-### Option 3: VPS with PM2
+### Option 3: VPS (Manual)
 
 For traditional VPS deployment:
 
